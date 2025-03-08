@@ -17,6 +17,31 @@ type DbInstances struct {
 	SqlDB  *sql.DB
 }
 
+func NewDbInstances() (*DbInstances, error) {
+	dsn, err := loadDsn()
+	if err != nil {
+		return nil, err
+	}
+
+	gormDb, err := gorm.Open(postgres.Open(dsn), &gorm.Config{PrepareStmt: true})
+	if err != nil {
+		return nil, &ConnectionToDbError{msg: "failed to open gormDb", err: err}
+	}
+
+	sqlDb, err := gormDb.DB()
+	if err != nil {
+		return nil, &ConnectionToDbError{msg: "failed to get SQL instance", err: err}
+	}
+	return &DbInstances{GormDb: gormDb, SqlDB: sqlDb}, nil
+}
+
+func (db *DbInstances) Disconnect() error {
+	if err := db.SqlDB.Close(); err != nil {
+		return &ConnectionToDbError{msg: "failed to close sqlDb", err: err}
+	}
+	return nil
+}
+
 func loadDsn() (string, error) {
 	err := godotenv.Load()
 	if err != nil {
@@ -41,31 +66,6 @@ func loadDsn() (string, error) {
 	}
 
 	return fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s TimeZone=Asia/Tokyo sslmode=disable", env["host"], env["user"], env["password"], env["dbname"], env["port"]), nil
-}
-
-func NewDbInstances() (*DbInstances, error) {
-	dsn, err := loadDsn()
-	if err != nil {
-		return nil, err
-	}
-
-	gormDb, err := gorm.Open(postgres.Open(dsn), &gorm.Config{PrepareStmt: true})
-	if err != nil {
-		return nil, &ConnectionToDbError{msg: "failed to open gormDb", err: err}
-	}
-
-	sqlDb, err := gormDb.DB()
-	if err != nil {
-		return nil, &ConnectionToDbError{msg: "failed to get SQL instance", err: err}
-	}
-	return &DbInstances{GormDb: gormDb, SqlDB: sqlDb}, nil
-}
-
-func (db *DbInstances) Disconnect() error {
-	if err := db.SqlDB.Close(); err != nil {
-		return &ConnectionToDbError{msg: "failed to close sqlDb", err: err}
-	}
-	return nil
 }
 
 type ConnectionToDbError struct {
