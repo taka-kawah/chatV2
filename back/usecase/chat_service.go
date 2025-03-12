@@ -22,7 +22,7 @@ func (cs *ChatService) PostChat(message string, userId uint, roomId uint) *ChatS
 	return nil
 }
 
-func (cs *ChatService) ReadRecentChats() (*[]domain.ChatView, *ChatServiceError) {
+func (cs *ChatService) GetRecentChats() (*[]domain.ChatView, *ChatServiceError) {
 	limit := 10 //とりあえず直近10件
 	chats, err := cs.chatViewRepo.FetchRecent(limit)
 	if err != nil {

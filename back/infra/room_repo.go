@@ -32,6 +32,15 @@ func (rd *RoomDriver) FetchAll() (*[]domain.Room, *RoomRepositoryError) {
 	return &rooms, nil
 }
 
+func (rd *RoomDriver) FetchById(id uint) (*domain.Room, *RoomRepositoryError) {
+	var room domain.Room
+	res := rd.gormDb.First(&room, id)
+	if res.Error != nil {
+		return nil, &RoomRepositoryError{msg: fmt.Sprintf("failed to get room: id = %v", id), err: res.Error}
+	}
+	return &room, nil
+}
+
 func (rd *RoomDriver) Update(room *domain.Room) *RoomRepositoryError {
 	if err := rd.gormDb.Save(room).Error; err != nil {
 		return &RoomRepositoryError{msg: fmt.Sprintf("failed to update room: id = %v", room.ID), err: err}
