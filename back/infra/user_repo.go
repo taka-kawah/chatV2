@@ -15,7 +15,7 @@ func NewUserDriver(gormDb *gorm.DB) *UserDriver {
 	return &UserDriver{gormDb: gormDb}
 }
 
-func (ud *UserDriver) Create(name string, email string, hashedPassword string) error {
+func (ud *UserDriver) Create(name string, email string, hashedPassword string) *UserRepositoryError {
 	newUser := domain.User{Name: name, Email: email, HashedPasseord: hashedPassword}
 	if err := ud.gormDb.Create(&newUser).Error; err != nil {
 		return &UserRepositoryError{msg: "failed to create new user", err: err}
@@ -23,7 +23,7 @@ func (ud *UserDriver) Create(name string, email string, hashedPassword string) e
 	return nil
 }
 
-func (ud *UserDriver) FindByEmail(email string) (*domain.User, error) {
+func (ud *UserDriver) FindByEmail(email string) (*domain.User, *UserRepositoryError) {
 	var user domain.User
 	res := ud.gormDb.First(&user)
 	if res.Error != nil {
@@ -32,7 +32,7 @@ func (ud *UserDriver) FindByEmail(email string) (*domain.User, error) {
 	return &user, nil
 }
 
-func (ud *UserDriver) FindAll() (*[]domain.User, error) {
+func (ud *UserDriver) FindAll() (*[]domain.User, *UserRepositoryError) {
 	var users []domain.User
 	res := ud.gormDb.Find(&users)
 	if res.Error != nil {
@@ -41,14 +41,14 @@ func (ud *UserDriver) FindAll() (*[]domain.User, error) {
 	return &users, nil
 }
 
-func (ud *UserDriver) Update(user *domain.User) error {
+func (ud *UserDriver) Update(user *domain.User) *UserRepositoryError {
 	if err := ud.gormDb.Save(user).Error; err != nil {
 		return &UserRepositoryError{msg: fmt.Sprintf("failed to update user: id = %v", user.ID), err: err}
 	}
 	return nil
 }
 
-func (ud *UserDriver) Delete(user *domain.User) error {
+func (ud *UserDriver) Delete(user *domain.User) *UserRepositoryError {
 	if err := ud.gormDb.Delete(user).Error; err != nil {
 		return &UserRepositoryError{msg: fmt.Sprintf("failed to update user: id = %v", user.ID), err: err}
 	}

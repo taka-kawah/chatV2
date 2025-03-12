@@ -15,15 +15,15 @@ func NewRoomDriver(gormDb *gorm.DB) *RoomDriver {
 	return &RoomDriver{gormDb: gormDb}
 }
 
-func (rd *RoomDriver) Create(name string) error {
+func (rd *RoomDriver) Create(name string) *RoomRepositoryError {
 	newRoom := domain.Room{Name: name}
 	if err := rd.gormDb.Create(newRoom).Error; err != nil {
-		return &UserRepositoryError{msg: "failed to create room", err: err}
+		return &RoomRepositoryError{msg: "failed to create room", err: err}
 	}
 	return nil
 }
 
-func (rd *RoomDriver) FindAll() (*[]domain.Room, error) {
+func (rd *RoomDriver) FindAll() (*[]domain.Room, *RoomRepositoryError) {
 	var rooms []domain.Room
 	res := rd.gormDb.Find(&rooms)
 	if res.Error != nil {
@@ -32,14 +32,14 @@ func (rd *RoomDriver) FindAll() (*[]domain.Room, error) {
 	return &rooms, nil
 }
 
-func (rd *RoomDriver) Update(room *domain.Room) error {
+func (rd *RoomDriver) Update(room *domain.Room) *RoomRepositoryError {
 	if err := rd.gormDb.Save(room).Error; err != nil {
-		return &UserRepositoryError{msg: fmt.Sprintf("failed to update room: id = %v", room.ID), err: err}
+		return &RoomRepositoryError{msg: fmt.Sprintf("failed to update room: id = %v", room.ID), err: err}
 	}
 	return nil
 }
 
-func (rd *RoomDriver) Delete(room *domain.Room) error {
+func (rd *RoomDriver) Delete(room *domain.Room) *RoomRepositoryError {
 	if err := rd.gormDb.Delete(room).Error; err != nil {
 		return &RoomRepositoryError{msg: fmt.Sprintf("failed to delete room: id = %v", room.ID), err: err}
 	}
