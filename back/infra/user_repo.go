@@ -23,20 +23,20 @@ func (ud *UserDriver) Create(name string, email string, hashedPassword string) *
 	return nil
 }
 
-func (ud *UserDriver) FindByEmail(email string) (*domain.User, *UserRepositoryError) {
+func (ud *UserDriver) FetchByEmail(email string) (*domain.User, *UserRepositoryError) {
 	var user domain.User
 	res := ud.gormDb.First(&user)
 	if res.Error != nil {
-		return nil, &UserRepositoryError{msg: fmt.Sprintf("failed to find user: email = %v", email), err: res.Error}
+		return nil, &UserRepositoryError{msg: fmt.Sprintf("failed to fetch user: email = %v", email), err: res.Error}
 	}
 	return &user, nil
 }
 
-func (ud *UserDriver) FindAll() (*[]domain.User, *UserRepositoryError) {
+func (ud *UserDriver) FetchAll() (*[]domain.User, *UserRepositoryError) {
 	var users []domain.User
 	res := ud.gormDb.Find(&users)
 	if res.Error != nil {
-		return nil, &UserRepositoryError{msg: "failed to find all users", err: res.Error}
+		return nil, &UserRepositoryError{msg: "failed to fetch all users", err: res.Error}
 	}
 	return &users, nil
 }

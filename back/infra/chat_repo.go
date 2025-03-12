@@ -29,7 +29,7 @@ type ChatRepositoryError struct {
 }
 
 func (e *ChatRepositoryError) Error() string {
-	return fmt.Sprintf("error in c chat db %s (%s)", e.msg, e.err)
+	return fmt.Sprintf("error in creating chat db %s (%s)", e.msg, e.err)
 }
 
 func (e *ChatRepositoryError) Unwrap() error {

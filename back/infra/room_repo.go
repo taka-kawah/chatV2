@@ -23,11 +23,11 @@ func (rd *RoomDriver) Create(name string) *RoomRepositoryError {
 	return nil
 }
 
-func (rd *RoomDriver) FindAll() (*[]domain.Room, *RoomRepositoryError) {
+func (rd *RoomDriver) FetchAll() (*[]domain.Room, *RoomRepositoryError) {
 	var rooms []domain.Room
 	res := rd.gormDb.Find(&rooms)
 	if res.Error != nil {
-		return nil, &RoomRepositoryError{msg: "failed to find all rooms", err: res.Error}
+		return nil, &RoomRepositoryError{msg: "failed to fetch all rooms", err: res.Error}
 	}
 	return &rooms, nil
 }
