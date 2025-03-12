@@ -1,7 +1,7 @@
 package infra
 
 import (
-	"back/usecase"
+	"back/domain"
 	"fmt"
 
 	"gorm.io/gorm"
@@ -15,8 +15,8 @@ func NewChatViewDriver(gormDb *gorm.DB) *ChatViewDriver {
 	return &ChatViewDriver{gormDb: *gormDb}
 }
 
-func (cvd *ChatViewDriver) FetchRecent(limit int) ([]usecase.ChatView, error) {
-	var chatViews []usecase.ChatView
+func (cvd *ChatViewDriver) FetchRecent(limit int) ([]domain.ChatView, error) {
+	var chatViews []domain.ChatView
 	query := `SELECT
 	chats.id, 
 	chats.created_at, 

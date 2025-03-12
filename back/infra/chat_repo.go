@@ -7,15 +7,15 @@ import (
 	"gorm.io/gorm"
 )
 
-type ChatRepository struct {
+type ChatDriver struct {
 	gormDb *gorm.DB
 }
 
-func NewChatRepository(gormDb *gorm.DB) *ChatRepository {
-	return &ChatRepository{gormDb: gormDb}
+func NewChatRepository(gormDb *gorm.DB) *ChatDriver {
+	return &ChatDriver{gormDb: gormDb}
 }
 
-func (cd *ChatRepository) Create(message string, userId uint, roomId uint) *ChatRepositoryError {
+func (cd *ChatDriver) Create(message string, userId uint, roomId uint) *ChatRepositoryError {
 	newChat := &domain.Chat{Message: message, UserId: userId, RoomId: roomId}
 	if err := cd.gormDb.Create(newChat).Error; err != nil {
 		return &ChatRepositoryError{msg: "failed to create new chat", err: err}
