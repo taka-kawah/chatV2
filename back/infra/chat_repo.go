@@ -11,7 +11,7 @@ type ChatDriver struct {
 	gormDb *gorm.DB
 }
 
-func NewChatRepository(gormDb *gorm.DB) *ChatDriver {
+func NewChatDriver(gormDb *gorm.DB) *ChatDriver {
 	return &ChatDriver{gormDb: gormDb}
 }
 
