@@ -17,19 +17,19 @@ func NewRoomDriver(gormDb *gorm.DB) *RoomDriver {
 
 func (rd *RoomDriver) Create(name string) *RoomRepositoryError {
 	newRoom := domain.Room{Name: name}
-	if err := rd.gormDb.Create(newRoom).Error; err != nil {
+	if err := rd.gormDb.Create(&newRoom).Error; err != nil {
 		return &RoomRepositoryError{msg: "failed to create room", err: err}
 	}
 	return nil
 }
 
-func (rd *RoomDriver) FetchAll() (*[]domain.Room, *RoomRepositoryError) {
+func (rd *RoomDriver) FetchAll() ([]domain.Room, *RoomRepositoryError) {
 	var rooms []domain.Room
 	res := rd.gormDb.Find(&rooms)
 	if res.Error != nil {
 		return nil, &RoomRepositoryError{msg: "failed to fetch all rooms", err: res.Error}
 	}
-	return &rooms, nil
+	return rooms, nil
 }
 
 func (rd *RoomDriver) FetchById(id uint) (*domain.Room, *RoomRepositoryError) {
@@ -41,16 +41,16 @@ func (rd *RoomDriver) FetchById(id uint) (*domain.Room, *RoomRepositoryError) {
 	return &room, nil
 }
 
-func (rd *RoomDriver) Update(room *domain.Room) *RoomRepositoryError {
-	if err := rd.gormDb.Save(room).Error; err != nil {
-		return &RoomRepositoryError{msg: fmt.Sprintf("failed to update room: id = %v", room.ID), err: err}
+func (rd *RoomDriver) UpdateNameById(id uint, newName string) *RoomRepositoryError {
+	if err := rd.gormDb.Model(&domain.Room{}).Where("id = ?", id).Update("name", newName).Error; err != nil {
+		return &RoomRepositoryError{msg: fmt.Sprintf("failed to update room: id = %v", id), err: err}
 	}
 	return nil
 }
 
-func (rd *RoomDriver) Delete(room *domain.Room) *RoomRepositoryError {
-	if err := rd.gormDb.Delete(room).Error; err != nil {
-		return &RoomRepositoryError{msg: fmt.Sprintf("failed to delete room: id = %v", room.ID), err: err}
+func (rd *RoomDriver) DeleteById(id uint) *RoomRepositoryError {
+	if err := rd.gormDb.Delete(&domain.Room{}, id).Error; err != nil {
+		return &RoomRepositoryError{msg: fmt.Sprintf("failed to delete room: id = %v", id), err: err}
 	}
 	return nil
 }
