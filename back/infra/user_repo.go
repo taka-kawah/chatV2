@@ -41,16 +41,16 @@ func (ud *UserDriver) FetchAll() (*[]domain.User, *UserRepositoryError) {
 	return &users, nil
 }
 
-func (ud *UserDriver) Update(user *domain.User) *UserRepositoryError {
-	if err := ud.gormDb.Save(user).Error; err != nil {
-		return &UserRepositoryError{msg: fmt.Sprintf("failed to update user: id = %v", user.ID), err: err}
+func (ud *UserDriver) UpdateNameById(id uint, newName string) *UserRepositoryError {
+	if err := ud.gormDb.Model(&domain.User{}).Where("id = ?", id).Update("name", newName).Error; err != nil {
+		return &UserRepositoryError{msg: fmt.Sprintf("failed to update user: id = %v", id), err: err}
 	}
 	return nil
 }
 
-func (ud *UserDriver) Delete(user *domain.User) *UserRepositoryError {
-	if err := ud.gormDb.Delete(user).Error; err != nil {
-		return &UserRepositoryError{msg: fmt.Sprintf("failed to update user: id = %v", user.ID), err: err}
+func (ud *UserDriver) DeleteById(id uint) *UserRepositoryError {
+	if err := ud.gormDb.Delete(&domain.User{}, id).Error; err != nil {
+		return &UserRepositoryError{msg: fmt.Sprintf("failed to update user: id = %v", id), err: err}
 	}
 	return nil
 }
