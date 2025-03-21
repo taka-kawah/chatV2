@@ -10,6 +10,12 @@ type RoomService struct {
 	repo infra.RoomDriver
 }
 
+type IRoomService interface {
+	CreateNewRoom(name string) *RoomServiceError
+	GetAllRooms() ([]domain.Room, *RoomServiceError)
+	UpdateRoomName(roomId uint, newName string) *RoomServiceError
+}
+
 func NewRoomService(repo *infra.RoomDriver) *RoomService {
 	return &RoomService{repo: *repo}
 }

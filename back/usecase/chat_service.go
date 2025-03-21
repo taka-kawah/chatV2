@@ -11,6 +11,11 @@ type ChatService struct {
 	chatViewRepo infra.ChatViewDriver
 }
 
+type IChatService interface {
+	PostChat(message string, userId uint, roomId uint) *ChatServiceError
+	GetRecentChatsFromOneRoom(roomId uint) (*[]domain.ChatView, *ChatServiceError)
+}
+
 func NewChatService(chatRepo *infra.ChatDriver, chatViewRepo *infra.ChatViewDriver) *ChatService {
 	return &ChatService{chatRepo: *chatRepo, chatViewRepo: *chatViewRepo}
 }
