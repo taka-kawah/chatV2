@@ -15,8 +15,8 @@ func NewUserDriver(gormDb *gorm.DB) *UserDriver {
 	return &UserDriver{gormDb: gormDb}
 }
 
-func (ud *UserDriver) Create(name string, email string, hashedPassword string) *UserRepositoryError {
-	newUser := domain.User{Name: name, Email: email, HashedPassword: hashedPassword}
+func (ud *UserDriver) Create(name string, email string) *UserRepositoryError {
+	newUser := domain.User{Name: name, Email: email}
 	if err := ud.gormDb.Create(&newUser).Error; err != nil {
 		return &UserRepositoryError{msg: "failed to create new user", err: err}
 	}

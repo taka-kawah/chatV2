@@ -17,19 +17,15 @@ func TestUserRepo(t *testing.T) {
 	d := NewUserDriver(mockDbInstances.GormDb)
 
 	t.Run("normal: create user", func(t *testing.T) {
-		testCreateUser(t, mockDbInstances.Mock, d, "test_name", "test_pass", "test@email.com")
+		testCreateUser(t, mockDbInstances.Mock, d, "test_name", "test@email.com")
 	})
 
 	t.Run("abnormal: create user without name", func(t *testing.T) {
-		testCreateUserWithoutName(t, mockDbInstances.Mock, d, "test_pass", "test_email")
-	})
-
-	t.Run("abnormal: create user without pass", func(t *testing.T) {
-		testcreateUserWithoutHashedPass(t, mockDbInstances.Mock, d, "test_name", "test_email")
+		testCreateUserWithoutName(t, mockDbInstances.Mock, d, "test_email")
 	})
 
 	t.Run("abnormal: create user without name", func(t *testing.T) {
-		testCreateUserWithoutEmail(t, mockDbInstances.Mock, d, "test_name", "test_pass")
+		testCreateUserWithoutEmail(t, mockDbInstances.Mock, d, "test_name")
 	})
 
 	t.Run("normal: fetch user by email", func(t *testing.T) {
@@ -57,25 +53,25 @@ func TestUserRepo(t *testing.T) {
 	})
 }
 
-func testCreateUser(t *testing.T, m sqlmock.Sqlmock, d *UserDriver, name string, hashedPassword string, email string) {
+func testCreateUser(t *testing.T, m sqlmock.Sqlmock, d *UserDriver, name string, email string) {
 	m.ExpectBegin()
-	m.ExpectQuery(regexp.QuoteMeta(`INSERT INTO "users" ("created_at","updated_at","deleted_at","name","hashed_password","email") VALUES ($1,$2,$3,$4,$5,$6) RETURNING "id"`)).
-		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), name, hashedPassword, email).
+	m.ExpectQuery(regexp.QuoteMeta(`INSERT INTO "users" ("created_at","updated_at","deleted_at","name","email") VALUES ($1,$2,$3,$4,$5) RETURNING "id"`)).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), name, email).
 		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
 	m.ExpectCommit()
-	if err := d.Create(name, email, hashedPassword); err != nil {
+	if err := d.Create(name, email); err != nil {
 		t.Errorf("unexpected error (%v)", err)
 	}
 }
 
-func testCreateUserWithoutName(t *testing.T, m sqlmock.Sqlmock, d *UserDriver, hashedPassword string, email string) {
+func testCreateUserWithoutName(t *testing.T, m sqlmock.Sqlmock, d *UserDriver, email string) {
 	m.ExpectBegin()
-	m.ExpectQuery(regexp.QuoteMeta(`INSERT INTO "users" ("created_at","updated_at","deleted_at","name","hashed_password","email") VALUES ($1,$2,$3,$4,$5,$6) RETURNING "id"`)).
-		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), "", hashedPassword, email).
+	m.ExpectQuery(regexp.QuoteMeta(`INSERT INTO "users" ("created_at","updated_at","deleted_at","name","email") VALUES ($1,$2,$3,$4,$5) RETURNING "id"`)).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), "", email).
 		WillReturnError(errors.New("expected"))
 	m.ExpectRollback()
 
-	err := d.Create("", email, hashedPassword)
+	err := d.Create("", email)
 	if err == nil {
 		t.Errorf("expected error but got nil")
 		return
@@ -86,31 +82,14 @@ func testCreateUserWithoutName(t *testing.T, m sqlmock.Sqlmock, d *UserDriver, h
 	}
 }
 
-func testcreateUserWithoutHashedPass(t *testing.T, m sqlmock.Sqlmock, d *UserDriver, name string, email string) {
+func testCreateUserWithoutEmail(t *testing.T, m sqlmock.Sqlmock, d *UserDriver, name string) {
 	m.ExpectBegin()
-	m.ExpectQuery(regexp.QuoteMeta(`INSERT INTO "users" ("created_at","updated_at","deleted_at","name","hashed_password","email") VALUES ($1,$2,$3,$4,$5,$6) RETURNING "id"`)).
-		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), name, "", email).
+	m.ExpectQuery(regexp.QuoteMeta(`INSERT INTO "users" ("created_at","updated_at","deleted_at","name","email") VALUES ($1,$2,$3,$4,$5) RETURNING "id"`)).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), name, "").
 		WillReturnError(errors.New("expected"))
 	m.ExpectRollback()
 
-	err := d.Create(name, email, "")
-	if err == nil {
-		t.Errorf("expected error but got nil")
-		return
-	}
-	if err.Unwrap().Error() != "expected" {
-		t.Errorf("unecpected error (%v)", err)
-	}
-}
-
-func testCreateUserWithoutEmail(t *testing.T, m sqlmock.Sqlmock, d *UserDriver, name string, pass string) {
-	m.ExpectBegin()
-	m.ExpectQuery(regexp.QuoteMeta(`INSERT INTO "users" ("created_at","updated_at","deleted_at","name","hashed_password","email") VALUES ($1,$2,$3,$4,$5,$6) RETURNING "id"`)).
-		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), name, pass, "").
-		WillReturnError(errors.New("expected"))
-	m.ExpectRollback()
-
-	err := d.Create(name, "", pass)
+	err := d.Create(name, "")
 	if err == nil {
 		t.Errorf("expected error but got nil")
 		return
