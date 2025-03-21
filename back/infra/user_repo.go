@@ -16,7 +16,7 @@ func NewUserDriver(gormDb *gorm.DB) *UserDriver {
 }
 
 func (ud *UserDriver) Create(name string, email string, hashedPassword string) *UserRepositoryError {
-	newUser := domain.User{Name: name, Email: email, HashedPasseord: hashedPassword}
+	newUser := domain.User{Name: name, Email: email, HashedPassword: hashedPassword}
 	if err := ud.gormDb.Create(&newUser).Error; err != nil {
 		return &UserRepositoryError{msg: "failed to create new user", err: err}
 	}
@@ -25,7 +25,7 @@ func (ud *UserDriver) Create(name string, email string, hashedPassword string) *
 
 func (ud *UserDriver) FetchByEmail(email string) (*domain.User, *UserRepositoryError) {
 	var user domain.User
-	res := ud.gormDb.First(&user)
+	res := ud.gormDb.Where("email = ?", email).First(&user)
 	if res.Error != nil {
 		return nil, &UserRepositoryError{msg: fmt.Sprintf("failed to fetch user: email = %v", email), err: res.Error}
 	}

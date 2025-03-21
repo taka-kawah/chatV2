@@ -17,8 +17,6 @@ func TestRoomRepo(t *testing.T) {
 	}
 	defer mockDbInstances.Disconnect()
 
-	mockDbInstances.GormDb = mockDbInstances.GormDb.Debug()
-
 	d := NewRoomDriver(mockDbInstances.GormDb)
 	t.Run("normal: fetch no room", func(t *testing.T) {
 		testFetchAllNone(t, mockDbInstances.Mock, d)
