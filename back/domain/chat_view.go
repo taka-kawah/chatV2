@@ -2,5 +2,5 @@ package domain
 
 type ChatView struct {
 	Chat
-	UserName string
+	UserName string `validate:"required" db:"user_name"`
 }
