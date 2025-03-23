@@ -2,6 +2,7 @@ package db
 
 import (
 	"back/domain"
+	"back/interfaces"
 	"errors"
 	"fmt"
 
@@ -16,7 +17,7 @@ func NewAuthDriver(gormDb *gorm.DB) *AuthDriver {
 	return &AuthDriver{gormDb: gormDb}
 }
 
-func (d *AuthDriver) Create(email string, hashedPassword string) error {
+func (d *AuthDriver) Create(email string, hashedPassword string) interfaces.CustomError {
 	newAuth := &domain.Auth{Email: email, HashedPassword: hashedPassword}
 	if err := d.gormDb.Create(newAuth).Error; err != nil {
 		return &AuthRepositoryError{msg: "failed to create auth", err: err}
@@ -24,7 +25,7 @@ func (d *AuthDriver) Create(email string, hashedPassword string) error {
 	return nil
 }
 
-func (d *AuthDriver) CheckIfExist(email string, hashedPassword string) (*domain.Auth, error) {
+func (d *AuthDriver) CheckIfExist(email string, hashedPassword string) (*domain.Auth, interfaces.CustomError) {
 	var auth domain.Auth
 	res := d.gormDb.Where("email = ? AND hashed_password = ?", email, hashedPassword).First(&auth)
 	if res.Error == nil {
@@ -36,7 +37,7 @@ func (d *AuthDriver) CheckIfExist(email string, hashedPassword string) (*domain.
 	return nil, &AuthRepositoryError{msg: fmt.Sprintf("failled to fetch auth email: %v", email), err: res.Error}
 }
 
-func (d *AuthDriver) DeleteAuth(email string, hashedPassword string) error {
+func (d *AuthDriver) DeleteAuth(email string, hashedPassword string) interfaces.CustomError {
 	var auth domain.Auth
 	if err := d.gormDb.Where("email = ? AND hashed_password = ?", email, hashedPassword).Delete(&auth).Error; err != nil {
 		return &AuthRepositoryError{msg: "failed to delete auth", err: err}

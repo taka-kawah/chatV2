@@ -2,6 +2,7 @@ package db
 
 import (
 	"back/domain"
+	"back/interfaces"
 	"fmt"
 
 	"gorm.io/gorm"
@@ -15,7 +16,7 @@ func NewChatViewDriver(gormDb *gorm.DB) *ChatViewDriver {
 	return &ChatViewDriver{gormDb: *gormDb}
 }
 
-func (cvd *ChatViewDriver) FetchRecent(roomId uint, limit int) ([]domain.ChatView, error) {
+func (cvd *ChatViewDriver) FetchRecent(roomId uint, limit int) ([]domain.ChatView, interfaces.CustomError) {
 	var chatViews []domain.ChatView
 	query := fmt.Sprintf(`SELECT
 	chats.id, 

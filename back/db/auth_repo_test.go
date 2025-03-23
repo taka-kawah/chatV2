@@ -38,7 +38,7 @@ func TestAuthRepo(t *testing.T) {
 			t.Errorf("expected error but got nil")
 			return
 		}
-		if err.(*AuthRepositoryError).Unwrap().Error() != "expected" {
+		if err.Unwrap().Error() != "expected" {
 			t.Errorf("unexpected error (%v)", err)
 			return
 		}
@@ -55,7 +55,7 @@ func TestAuthRepo(t *testing.T) {
 			t.Errorf("expected error but got nil")
 			return
 		}
-		if err.(*AuthRepositoryError).Unwrap().Error() != "expected" {
+		if err.Unwrap().Error() != "expected" {
 			t.Errorf("unexpected error (%v)", err)
 			return
 		}

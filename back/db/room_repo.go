@@ -2,6 +2,7 @@ package db
 
 import (
 	"back/domain"
+	"back/interfaces"
 	"fmt"
 
 	"gorm.io/gorm"
@@ -15,7 +16,7 @@ func NewRoomDriver(gormDb *gorm.DB) *RoomDriver {
 	return &RoomDriver{gormDb: gormDb}
 }
 
-func (rd *RoomDriver) Create(name string) *RoomRepositoryError {
+func (rd *RoomDriver) Create(name string) interfaces.CustomError {
 	newRoom := domain.Room{Name: name}
 	if err := rd.gormDb.Create(&newRoom).Error; err != nil {
 		return &RoomRepositoryError{msg: "failed to create room", err: err}
@@ -23,7 +24,7 @@ func (rd *RoomDriver) Create(name string) *RoomRepositoryError {
 	return nil
 }
 
-func (rd *RoomDriver) FetchAll() ([]domain.Room, *RoomRepositoryError) {
+func (rd *RoomDriver) FetchAll() ([]domain.Room, interfaces.CustomError) {
 	var rooms []domain.Room
 	res := rd.gormDb.Find(&rooms)
 	if res.Error != nil {
@@ -32,7 +33,7 @@ func (rd *RoomDriver) FetchAll() ([]domain.Room, *RoomRepositoryError) {
 	return rooms, nil
 }
 
-func (rd *RoomDriver) FetchById(id uint) (*domain.Room, *RoomRepositoryError) {
+func (rd *RoomDriver) FetchById(id uint) (*domain.Room, interfaces.CustomError) {
 	var room domain.Room
 	res := rd.gormDb.First(&room, id)
 	if res.Error != nil {
@@ -41,14 +42,14 @@ func (rd *RoomDriver) FetchById(id uint) (*domain.Room, *RoomRepositoryError) {
 	return &room, nil
 }
 
-func (rd *RoomDriver) UpdateNameById(id uint, newName string) *RoomRepositoryError {
+func (rd *RoomDriver) UpdateNameById(id uint, newName string) interfaces.CustomError {
 	if err := rd.gormDb.Model(&domain.Room{}).Where("id = ?", id).Update("name", newName).Error; err != nil {
 		return &RoomRepositoryError{msg: fmt.Sprintf("failed to update room: id = %v", id), err: err}
 	}
 	return nil
 }
 
-func (rd *RoomDriver) DeleteById(id uint) *RoomRepositoryError {
+func (rd *RoomDriver) DeleteById(id uint) interfaces.CustomError {
 	if err := rd.gormDb.Delete(&domain.Room{}, id).Error; err != nil {
 		return &RoomRepositoryError{msg: fmt.Sprintf("failed to delete room: id = %v", id), err: err}
 	}

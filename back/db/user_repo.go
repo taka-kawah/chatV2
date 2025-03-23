@@ -2,6 +2,7 @@ package db
 
 import (
 	"back/domain"
+	"back/interfaces"
 	"fmt"
 
 	"gorm.io/gorm"
@@ -15,7 +16,7 @@ func NewUserDriver(gormDb *gorm.DB) *UserDriver {
 	return &UserDriver{gormDb: gormDb}
 }
 
-func (ud *UserDriver) Create(name string, email string) *UserRepositoryError {
+func (ud *UserDriver) Create(name string, email string) interfaces.CustomError {
 	newUser := domain.User{Name: name, Email: email}
 	if err := ud.gormDb.Create(&newUser).Error; err != nil {
 		return &UserRepositoryError{msg: "failed to create new user", err: err}
@@ -23,7 +24,7 @@ func (ud *UserDriver) Create(name string, email string) *UserRepositoryError {
 	return nil
 }
 
-func (ud *UserDriver) FetchByEmail(email string) (*domain.User, *UserRepositoryError) {
+func (ud *UserDriver) FetchByEmail(email string) (*domain.User, interfaces.CustomError) {
 	var user domain.User
 	res := ud.gormDb.Where("email = ?", email).First(&user)
 	if res.Error != nil {
@@ -32,7 +33,7 @@ func (ud *UserDriver) FetchByEmail(email string) (*domain.User, *UserRepositoryE
 	return &user, nil
 }
 
-func (ud *UserDriver) FetchAll() (*[]domain.User, *UserRepositoryError) {
+func (ud *UserDriver) FetchAll() (*[]domain.User, interfaces.CustomError) {
 	var users []domain.User
 	res := ud.gormDb.Find(&users)
 	if res.Error != nil {
@@ -41,14 +42,14 @@ func (ud *UserDriver) FetchAll() (*[]domain.User, *UserRepositoryError) {
 	return &users, nil
 }
 
-func (ud *UserDriver) UpdateNameById(id uint, newName string) *UserRepositoryError {
+func (ud *UserDriver) UpdateNameById(id uint, newName string) interfaces.CustomError {
 	if err := ud.gormDb.Model(&domain.User{}).Where("id = ?", id).Update("name", newName).Error; err != nil {
 		return &UserRepositoryError{msg: fmt.Sprintf("failed to update user: id = %v", id), err: err}
 	}
 	return nil
 }
 
-func (ud *UserDriver) DeleteById(id uint) *UserRepositoryError {
+func (ud *UserDriver) DeleteById(id uint) interfaces.CustomError {
 	if err := ud.gormDb.Delete(&domain.User{}, id).Error; err != nil {
 		return &UserRepositoryError{msg: fmt.Sprintf("failed to update user: id = %v", id), err: err}
 	}

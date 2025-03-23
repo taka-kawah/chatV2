@@ -1,6 +1,7 @@
 package db
 
 import (
+	"back/interfaces"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -17,10 +18,10 @@ type DbInstances struct {
 	SqlDB  *sql.DB
 }
 
-func NewDbInstances() (*DbInstances, error) {
+func NewDbInstances() (*DbInstances, interfaces.CustomError) {
 	dsn, err := loadDsn()
 	if err != nil {
-		return nil, err
+		return nil, err.(interfaces.CustomError)
 	}
 
 	gormDb, err := gorm.Open(postgres.Open(dsn), &gorm.Config{PrepareStmt: true})

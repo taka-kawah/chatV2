@@ -90,7 +90,7 @@ func testCreateRoomWithNoName(t *testing.T, m sqlmock.Sqlmock, d *RoomDriver) {
 		t.Errorf("expected error but got nil")
 		return
 	}
-	if err.msg != "expected" {
+	if err.Unwrap().Error() != "expected" {
 		t.Errorf("unexpected error (%v)", err)
 		return
 	}
@@ -172,8 +172,8 @@ func testFetchRoomByIdNone(t *testing.T, m sqlmock.Sqlmock, d *RoomDriver) {
 		t.Errorf("expected error but got nil")
 		return
 	}
-	if err.err.Error() != "error in crud room db failed to update room: id = 1 (expected)" {
-		t.Errorf("unexpected error (%v)", err.err.Error())
+	if err.Unwrap().Error() != "error in crud room db failed to update room: id = 1 (expected)" {
+		t.Errorf("unexpected error (%v)", err.Unwrap().Error())
 		return
 	}
 }
@@ -206,7 +206,7 @@ func testUpdateNonExistRoom(t *testing.T, m sqlmock.Sqlmock, d *RoomDriver) {
 		t.Errorf("expected error but got nil")
 		return
 	}
-	if err.msg != "expected" {
+	if err.Unwrap().Error() != "expected" {
 		t.Errorf("unexpected error (%v)", err)
 		return
 	}
@@ -240,7 +240,7 @@ func testDeleteNonExistRoom(t *testing.T, m sqlmock.Sqlmock, d *RoomDriver) {
 		t.Errorf("expected error but got nil")
 		return
 	}
-	if err.msg != "expected" {
+	if err.Unwrap().Error() != "expected" {
 		t.Errorf("unexpected error (%v)", err)
 		return
 	}

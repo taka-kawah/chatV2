@@ -2,12 +2,13 @@ package usecase
 
 import (
 	"back/db"
+	"back/interfaces"
 	"back/middleware"
 	"fmt"
 )
 
 type IAuthService interface {
-	SignUp(email string, hashedPassword string) error
+	SignUp(email string, hashedPassword string) interfaces.CustomError
 	SignIn(id string, hashedPassword string) (string, error)
 }
 
@@ -19,7 +20,7 @@ func NewAuthService(repo *db.AuthDriver) *AuthService {
 	return &AuthService{repo: repo}
 }
 
-func (as *AuthService) SignUp(email string, hashedPassword string) error {
+func (as *AuthService) SignUp(email string, hashedPassword string) interfaces.CustomError {
 	if err := as.repo.Create(email, hashedPassword); err != nil {
 		return &AuthServiceError{msg: "failed to create auth record", err: err}
 	}

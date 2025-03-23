@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"back/interfaces"
 	"net/http"
 	"strings"
 
@@ -33,7 +34,10 @@ func AuthMW() gin.HandlerFunc {
 
 		err := validateToken(tokenString)
 		if err != nil {
-			ctx.JSON(http.StatusUnauthorized, gin.H{"error": err})
+			ctx.JSON(http.StatusUnauthorized, gin.H{
+				"msg":            err.Error(),
+				"internal error": err.Unwrap(),
+			})
 			ctx.Abort()
 			return
 		}
@@ -42,7 +46,7 @@ func AuthMW() gin.HandlerFunc {
 	}
 }
 
-func GenerateToken(id uint) (string, error) {
+func GenerateToken(id uint) (string, interfaces.CustomError) {
 	key, err := loadSecretKey()
 	if err != nil {
 		return "", &AuthMWError{msg: "failed to load secret key", err: err}
@@ -58,7 +62,7 @@ func GenerateToken(id uint) (string, error) {
 	return tokenString, nil
 }
 
-func validateToken(tokenString string) error {
+func validateToken(tokenString string) interfaces.CustomError {
 	key, err := loadSecretKey()
 	if err != nil {
 		return &AuthMWError{msg: "failed to load secret key", err: err}

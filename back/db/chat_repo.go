@@ -2,6 +2,7 @@ package db
 
 import (
 	"back/domain"
+	"back/interfaces"
 	"fmt"
 
 	"gorm.io/gorm"
@@ -15,7 +16,7 @@ func NewChatDriver(gormDb *gorm.DB) *ChatDriver {
 	return &ChatDriver{gormDb: gormDb}
 }
 
-func (cd *ChatDriver) Create(message string, userId uint, roomId uint) *ChatRepositoryError {
+func (cd *ChatDriver) Create(message string, userId uint, roomId uint) interfaces.CustomError {
 	newChat := &domain.Chat{Message: message, UserId: userId, RoomId: roomId}
 	if err := cd.gormDb.Create(newChat).Error; err != nil {
 		return &ChatRepositoryError{msg: "failed to create new chat", err: err}
