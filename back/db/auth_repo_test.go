@@ -1,4 +1,4 @@
-package infra
+package db
 
 import (
 	"errors"
@@ -38,7 +38,7 @@ func TestAuthRepo(t *testing.T) {
 			t.Errorf("expected error but got nil")
 			return
 		}
-		if err.Unwrap().Error() != "expected" {
+		if err.(*AuthRepositoryError).Unwrap().Error() != "expected" {
 			t.Errorf("unexpected error (%v)", err)
 			return
 		}
@@ -55,7 +55,7 @@ func TestAuthRepo(t *testing.T) {
 			t.Errorf("expected error but got nil")
 			return
 		}
-		if err.Unwrap().Error() != "expected" {
+		if err.(*AuthRepositoryError).Unwrap().Error() != "expected" {
 			t.Errorf("unexpected error (%v)", err)
 			return
 		}

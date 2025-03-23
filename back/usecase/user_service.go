@@ -1,13 +1,13 @@
 package usecase
 
 import (
+	"back/db"
 	"back/domain"
-	"back/infra"
 	"fmt"
 )
 
 type UserService struct {
-	repo infra.UserDriver
+	repo db.UserDriver
 }
 
 type IUserService interface {
@@ -18,7 +18,7 @@ type IUserService interface {
 	Delete(id uint) *UserServiceError
 }
 
-func NewUserService(repo *infra.UserDriver) *UserService {
+func NewUserService(repo *db.UserDriver) *UserService {
 	return &UserService{repo: *repo}
 }
 

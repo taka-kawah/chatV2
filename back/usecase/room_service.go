@@ -1,13 +1,13 @@
 package usecase
 
 import (
+	"back/db"
 	"back/domain"
-	"back/infra"
 	"fmt"
 )
 
 type RoomService struct {
-	repo infra.RoomDriver
+	repo db.RoomDriver
 }
 
 type IRoomService interface {
@@ -16,7 +16,7 @@ type IRoomService interface {
 	UpdateRoomName(roomId uint, newName string) *RoomServiceError
 }
 
-func NewRoomService(repo *infra.RoomDriver) *RoomService {
+func NewRoomService(repo *db.RoomDriver) *RoomService {
 	return &RoomService{repo: *repo}
 }
 

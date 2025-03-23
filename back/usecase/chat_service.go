@@ -1,14 +1,14 @@
 package usecase
 
 import (
+	"back/db"
 	"back/domain"
-	"back/infra"
 	"fmt"
 )
 
 type ChatService struct {
-	chatRepo     infra.ChatDriver
-	chatViewRepo infra.ChatViewDriver
+	chatRepo     db.ChatDriver
+	chatViewRepo db.ChatViewDriver
 }
 
 type IChatService interface {
@@ -16,7 +16,7 @@ type IChatService interface {
 	GetRecentChatsFromOneRoom(roomId uint) (*[]domain.ChatView, *ChatServiceError)
 }
 
-func NewChatService(chatRepo *infra.ChatDriver, chatViewRepo *infra.ChatViewDriver) *ChatService {
+func NewChatService(chatRepo *db.ChatDriver, chatViewRepo *db.ChatViewDriver) *ChatService {
 	return &ChatService{chatRepo: *chatRepo, chatViewRepo: *chatViewRepo}
 }
 
