@@ -20,18 +20,13 @@ const (
 	maxMessageSize = 512
 )
 
-type IClient interface {
-	readPump()
-	writePump()
-}
-
 type client struct {
 	hub  *hub
 	conn *websocket.Conn
 	send chan []byte
 }
 
-func (c *client) readPump() {
+func (c *client) sendMessageToHub() {
 	defer func() {
 		c.hub.unregister <- c
 		c.conn.Close()
@@ -56,7 +51,7 @@ func (c *client) readPump() {
 	}
 }
 
-func (c *client) writePump() {
+func (c *client) sendMessageToClient() {
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
 		ticker.Stop()

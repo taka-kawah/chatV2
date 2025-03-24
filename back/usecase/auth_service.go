@@ -3,7 +3,7 @@ package usecase
 import (
 	"back/db"
 	"back/interfaces"
-	"back/middleware"
+	"back/middleware/authentication"
 	"fmt"
 )
 
@@ -35,7 +35,7 @@ func (as *AuthService) SignIn(email string, hashedPassword string) (string, erro
 	if auth == nil {
 		return "", &AuthServiceError{msg: "fetched auth was nil", err: fmt.Errorf("email: %v", email)}
 	}
-	tokenString, err := middleware.GenerateToken(auth.ID)
+	tokenString, err := authentication.GenerateToken(auth.ID)
 	if err != nil {
 		return "", err
 	}

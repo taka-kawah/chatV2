@@ -28,6 +28,6 @@ func ServeWs(h *hub, w http.ResponseWriter, r *http.Request) {
 	}
 	h.register <- client
 
-	go client.writePump()
-	go client.readPump()
+	go client.sendMessageToClient()
+	go client.sendMessageToHub()
 }

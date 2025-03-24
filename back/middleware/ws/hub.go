@@ -2,19 +2,17 @@ package ws
 
 import "log"
 
-type IHub interface {
-	run()
-}
-
 type hub struct {
+	roomId     uint
 	clients    map[*client]bool
 	broadcast  chan []byte
 	register   chan *client
 	unregister chan *client
 }
 
-func NewHub() *hub {
+func newHub(roomId uint) *hub {
 	return &hub{
+		roomId:     roomId,
 		clients:    make(map[*client]bool),
 		broadcast:  make(chan []byte),
 		register:   make(chan *client),
@@ -32,7 +30,7 @@ func (h *hub) run() {
 			if _, ok := h.clients[client]; ok {
 				delete(h.clients, client)
 				close(client.send)
-				log.Println("ws disconnected", client.conn.RemoteAddr())
+				log.Println("ws disconnected", h.roomId, client.conn.RemoteAddr())
 			}
 		case message := <-h.broadcast:
 			for client := range h.clients {
@@ -41,7 +39,7 @@ func (h *hub) run() {
 				default:
 					close(client.send)
 					delete(h.clients, client)
-					log.Println("failed to send message to client", client.conn.RemoteAddr())
+					log.Println("failed to send message to client", h.roomId, client.conn.RemoteAddr())
 				}
 			}
 		}
