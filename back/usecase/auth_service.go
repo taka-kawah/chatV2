@@ -8,44 +8,52 @@ import (
 )
 
 type AuthService struct {
-	repo *db.AuthDriver
+	d *db.AuthDriver
+	m *authentication.AuthMiddleware
 }
 
-func NewAuthService(repo *db.AuthDriver) interfaces.AuthProvider {
-	return &AuthService{repo: repo}
+func NewAuthService(d *db.AuthDriver, m *authentication.AuthMiddleware) interfaces.AuthProvider {
+	return &AuthService{d: d, m: m}
 }
 
 func (as *AuthService) SignUp(email string, hashedPassword string) interfaces.CustomError {
-	if err := as.repo.Create(email, hashedPassword); err != nil {
-		return &AuthServiceError{msg: "failed to create auth record", err: err}
+	if err := as.d.Create(email, hashedPassword); err != nil {
+		return &authServiceError{msg: "failed to create auth record", err: err}
 	}
 	return nil
 }
 
-func (as *AuthService) SignIn(email string, hashedPassword string) (string, error) {
-	auth, err := as.repo.CheckIfExist(email, hashedPassword)
+func (as *AuthService) SignIn(email string, hashedPassword string) (string, interfaces.CustomError) {
+	auth, err := as.d.CheckIfExist(email, hashedPassword)
 	if err != nil {
-		return "", &AuthServiceError{msg: "failed to fetch auth record", err: err}
+		return "", &authServiceError{msg: "failed to fetch auth record", err: err}
 	}
 	if auth == nil {
-		return "", &AuthServiceError{msg: "fetched auth was nil", err: fmt.Errorf("email: %v", email)}
+		return "", &authServiceError{msg: "fetched auth was nil", err: fmt.Errorf("email: %v", email)}
 	}
-	tokenString, err := authentication.GenerateToken(auth.ID)
+	tokenString, err := as.m.GenerateToken(auth.ID)
 	if err != nil {
 		return "", err
 	}
 	return tokenString, nil
 }
 
-type AuthServiceError struct {
+func (as *AuthService) ValidateToken(token string) interfaces.CustomError {
+	if err := as.m.ValidateToken(token); err != nil {
+		return &authServiceError{msg: "failed to validate token", err: err}
+	}
+	return nil
+}
+
+type authServiceError struct {
 	msg string
 	err error
 }
 
-func (e *AuthServiceError) Error() string {
+func (e *authServiceError) Error() string {
 	return fmt.Sprintf("error occured in auth service %v (%v)", e.msg, e.err)
 }
 
-func (e *AuthServiceError) Unwrap() error {
+func (e *authServiceError) Unwrap() error {
 	return e.err
 }

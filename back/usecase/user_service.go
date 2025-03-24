@@ -18,7 +18,7 @@ func NewUserService(repo *db.UserDriver) interfaces.UserProvider {
 func (us *UserService) GetAllUsers() ([]domain.User, interfaces.CustomError) {
 	users, err := us.repo.FetchAll()
 	if err != nil {
-		return nil, &UserServiceError{msg: "failed to get all users", err: err}
+		return nil, &userServiceError{msg: "failed to get all users", err: err}
 	}
 	return *users, nil
 }
@@ -26,41 +26,41 @@ func (us *UserService) GetAllUsers() ([]domain.User, interfaces.CustomError) {
 func (us *UserService) GetFromEmail(email string) (*domain.User, interfaces.CustomError) {
 	user, err := us.repo.FetchByEmail(email)
 	if err != nil {
-		return nil, &UserServiceError{msg: fmt.Sprintf("failed to get user from email: %v", email), err: err}
+		return nil, &userServiceError{msg: fmt.Sprintf("failed to get user from email: %v", email), err: err}
 	}
 	return user, nil
 }
 
 func (us *UserService) RegisterAccount(name string, email string) interfaces.CustomError {
 	if err := us.repo.Create(name, email); err != nil {
-		return &UserServiceError{msg: "failed to create account", err: err}
+		return &userServiceError{msg: "failed to create account", err: err}
 	}
 	return nil
 }
 
 func (us *UserService) UpdateName(id uint, newName string) interfaces.CustomError {
 	if err := us.repo.UpdateNameById(id, newName); err != nil {
-		return &UserServiceError{msg: fmt.Sprintf("failed to update account id: %v", id), err: err}
+		return &userServiceError{msg: fmt.Sprintf("failed to update account id: %v", id), err: err}
 	}
 	return nil
 }
 
 func (us *UserService) Delete(id uint) interfaces.CustomError {
 	if err := us.repo.DeleteById(id); err != nil {
-		return &UserServiceError{msg: fmt.Sprintf("failed to delete account id: %v", id), err: err}
+		return &userServiceError{msg: fmt.Sprintf("failed to delete account id: %v", id), err: err}
 	}
 	return nil
 }
 
-type UserServiceError struct {
+type userServiceError struct {
 	msg string
 	err error
 }
 
-func (e *UserServiceError) Error() string {
+func (e *userServiceError) Error() string {
 	return fmt.Sprintf("error occurs in user service %s (%s)", e.msg, e.err)
 }
 
-func (e *UserServiceError) Unwrap() error {
+func (e *userServiceError) Unwrap() error {
 	return e.err
 }

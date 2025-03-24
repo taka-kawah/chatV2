@@ -2,7 +2,7 @@ package ws
 
 import "log"
 
-type hub struct {
+type Hub struct {
 	roomId     uint
 	clients    map[*client]bool
 	broadcast  chan []byte
@@ -10,8 +10,8 @@ type hub struct {
 	unregister chan *client
 }
 
-func newHub(roomId uint) *hub {
-	return &hub{
+func newHub(roomId uint) *Hub {
+	return &Hub{
 		roomId:     roomId,
 		clients:    make(map[*client]bool),
 		broadcast:  make(chan []byte),
@@ -20,7 +20,7 @@ func newHub(roomId uint) *hub {
 	}
 }
 
-func (h *hub) run() {
+func (h *Hub) run() {
 	for {
 		select {
 		case client := <-h.register:

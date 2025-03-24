@@ -21,7 +21,7 @@ const (
 )
 
 type client struct {
-	hub  *hub
+	hub  *Hub
 	conn *websocket.Conn
 	send chan []byte
 }

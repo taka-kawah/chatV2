@@ -26,19 +26,19 @@ func NewDbInstances() (*DbInstances, interfaces.CustomError) {
 
 	gormDb, err := gorm.Open(postgres.Open(dsn), &gorm.Config{PrepareStmt: true})
 	if err != nil {
-		return nil, &ConnectionToDbError{msg: "failed to open gormDb", err: err}
+		return nil, &connectionToDbError{msg: "failed to open gormDb", err: err}
 	}
 
 	sqlDb, err := gormDb.DB()
 	if err != nil {
-		return nil, &ConnectionToDbError{msg: "failed to get SQL instance", err: err}
+		return nil, &connectionToDbError{msg: "failed to get SQL instance", err: err}
 	}
 	return &DbInstances{GormDb: gormDb, SqlDB: sqlDb}, nil
 }
 
 func (db *DbInstances) Disconnect() error {
 	if err := db.SqlDB.Close(); err != nil {
-		return &ConnectionToDbError{msg: "failed to close sqlDb", err: err}
+		return &connectionToDbError{msg: "failed to close sqlDb", err: err}
 	}
 	return nil
 }
@@ -46,7 +46,7 @@ func (db *DbInstances) Disconnect() error {
 func loadDsn() (string, error) {
 	err := godotenv.Load()
 	if err != nil {
-		return "", &ConnectionToDbError{msg: "failed to load dotenv", err: err}
+		return "", &connectionToDbError{msg: "failed to load dotenv", err: err}
 	}
 
 	env := map[string]string{
@@ -63,21 +63,21 @@ func loadDsn() (string, error) {
 		}
 	}
 	if len(emptyEnvs) > 0 {
-		return "", &ConnectionToDbError{msg: "missing required environment variables", err: errors.New(strings.Join(emptyEnvs, ","))}
+		return "", &connectionToDbError{msg: "missing required environment variables", err: errors.New(strings.Join(emptyEnvs, ","))}
 	}
 
 	return fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s TimeZone=Asia/Tokyo sslmode=disable", env["host"], env["user"], env["password"], env["dbname"], env["port"]), nil
 }
 
-type ConnectionToDbError struct {
+type connectionToDbError struct {
 	msg string
 	err error
 }
 
-func (e *ConnectionToDbError) Error() string {
+func (e *connectionToDbError) Error() string {
 	return fmt.Sprintf("error in establishing connection to db %s (%s)", e.msg, e.err)
 }
 
-func (e *ConnectionToDbError) Unwrap() error {
+func (e *connectionToDbError) Unwrap() error {
 	return e.err
 }

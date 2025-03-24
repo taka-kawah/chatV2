@@ -33,20 +33,20 @@ func (cvd *ChatViewDriver) FetchRecent(roomId uint, limit int) ([]domain.ChatVie
 	ORDER BY chats.created_at DESC
 	LIMIT %v`, roomId, limit)
 	if err := cvd.gormDb.Raw(query).Scan(&chatViews).Error; err != nil {
-		return nil, &ChatViewRepositoryError{msg: "failed to fetch recent chats", err: err}
+		return nil, &chatViewRepositoryError{msg: "failed to fetch recent chats", err: err}
 	}
 	return chatViews, nil
 }
 
-type ChatViewRepositoryError struct {
+type chatViewRepositoryError struct {
 	msg string
 	err error
 }
 
-func (e *ChatViewRepositoryError) Error() string {
+func (e *chatViewRepositoryError) Error() string {
 	return fmt.Sprintf("error occurs in reading chat_view %s (%s)", e.msg, e.err)
 }
 
-func (e *ChatViewRepositoryError) Unwrap() error {
+func (e *chatViewRepositoryError) Unwrap() error {
 	return e.err
 }

@@ -165,14 +165,14 @@ func testFetchRoomByIdNone(t *testing.T, m sqlmock.Sqlmock, d *RoomDriver) {
 	id := 1
 	m.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "rooms" WHERE "rooms"."id" = $1 AND "rooms"."deleted_at" IS NULL ORDER BY "rooms"."id" LIMIT $2`)).
 		WithArgs(id, 1).
-		WillReturnError(&RoomRepositoryError{msg: fmt.Sprintf("failed to update room: id = %v", id), err: errors.New("expected")})
+		WillReturnError(errors.New("expected"))
 
 	_, err := d.FetchById(uint(id))
 	if err == nil {
 		t.Errorf("expected error but got nil")
 		return
 	}
-	if err.Unwrap().Error() != "error in crud room db failed to update room: id = 1 (expected)" {
+	if err.Unwrap().Error() != "expected" {
 		t.Errorf("unexpected error (%v)", err.Unwrap().Error())
 		return
 	}

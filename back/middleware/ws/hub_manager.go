@@ -1,14 +1,14 @@
 package ws
 
 type HubManager struct {
-	hubs map[uint]*hub
+	hubs map[uint]*Hub
 }
 
 func NewHubManager() *HubManager {
-	return &HubManager{hubs: make(map[uint]*hub)}
+	return &HubManager{hubs: make(map[uint]*Hub)}
 }
 
-func (hm *HubManager) GetOrCreate(roomId uint) *hub {
+func (hm *HubManager) GetOrCreate(roomId uint) *Hub {
 	if h, exists := hm.hubs[roomId]; exists {
 		return h
 	}

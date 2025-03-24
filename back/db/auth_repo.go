@@ -20,7 +20,7 @@ func NewAuthDriver(gormDb *gorm.DB) *AuthDriver {
 func (d *AuthDriver) Create(email string, hashedPassword string) interfaces.CustomError {
 	newAuth := &domain.Auth{Email: email, HashedPassword: hashedPassword}
 	if err := d.gormDb.Create(newAuth).Error; err != nil {
-		return &AuthRepositoryError{msg: "failed to create auth", err: err}
+		return &authRepositoryError{msg: "failed to create auth", err: err}
 	}
 	return nil
 }
@@ -34,26 +34,26 @@ func (d *AuthDriver) CheckIfExist(email string, hashedPassword string) (*domain.
 	if errors.Is(res.Error, gorm.ErrRecordNotFound) {
 		return nil, nil
 	}
-	return nil, &AuthRepositoryError{msg: fmt.Sprintf("failled to fetch auth email: %v", email), err: res.Error}
+	return nil, &authRepositoryError{msg: fmt.Sprintf("failled to fetch auth email: %v", email), err: res.Error}
 }
 
 func (d *AuthDriver) DeleteAuth(email string, hashedPassword string) interfaces.CustomError {
 	var auth domain.Auth
 	if err := d.gormDb.Where("email = ? AND hashed_password = ?", email, hashedPassword).Delete(&auth).Error; err != nil {
-		return &AuthRepositoryError{msg: "failed to delete auth", err: err}
+		return &authRepositoryError{msg: "failed to delete auth", err: err}
 	}
 	return nil
 }
 
-type AuthRepositoryError struct {
+type authRepositoryError struct {
 	msg string
 	err error
 }
 
-func (e *AuthRepositoryError) Error() string {
+func (e *authRepositoryError) Error() string {
 	return fmt.Sprintf("error occurs in auth db %s (%s)", e.msg, e.err)
 }
 
-func (e *AuthRepositoryError) Unwrap() error {
+func (e *authRepositoryError) Unwrap() error {
 	return e.err
 }

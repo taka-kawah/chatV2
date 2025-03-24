@@ -19,20 +19,20 @@ func NewChatDriver(gormDb *gorm.DB) *ChatDriver {
 func (cd *ChatDriver) Create(message string, userId uint, roomId uint) interfaces.CustomError {
 	newChat := &domain.Chat{Message: message, UserId: userId, RoomId: roomId}
 	if err := cd.gormDb.Create(newChat).Error; err != nil {
-		return &ChatRepositoryError{msg: "failed to create new chat", err: err}
+		return &chatRepositoryError{msg: "failed to create new chat", err: err}
 	}
 	return nil
 }
 
-type ChatRepositoryError struct {
+type chatRepositoryError struct {
 	msg string
 	err error
 }
 
-func (e *ChatRepositoryError) Error() string {
+func (e *chatRepositoryError) Error() string {
 	return fmt.Sprintf("error in creating chat db %s (%s)", e.msg, e.err)
 }
 
-func (e *ChatRepositoryError) Unwrap() error {
+func (e *chatRepositoryError) Unwrap() error {
 	return e.err
 }
