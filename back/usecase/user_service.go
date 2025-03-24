@@ -11,7 +11,7 @@ type UserService struct {
 	repo db.UserDriver
 }
 
-func NewUserService(repo *db.UserDriver) *UserService {
+func NewUserService(repo *db.UserDriver) interfaces.UserProvider {
 	return &UserService{repo: *repo}
 }
 

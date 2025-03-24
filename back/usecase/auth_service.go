@@ -11,7 +11,7 @@ type AuthService struct {
 	repo *db.AuthDriver
 }
 
-func NewAuthService(repo *db.AuthDriver) *AuthService {
+func NewAuthService(repo *db.AuthDriver) interfaces.AuthProvider {
 	return &AuthService{repo: repo}
 }
 

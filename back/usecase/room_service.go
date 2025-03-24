@@ -11,7 +11,7 @@ type RoomService struct {
 	repo db.RoomDriver
 }
 
-func NewRoomService(repo *db.RoomDriver) *RoomService {
+func NewRoomService(repo *db.RoomDriver) interfaces.RoomProvider {
 	return &RoomService{repo: *repo}
 }
 

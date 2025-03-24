@@ -12,7 +12,7 @@ type ChatService struct {
 	chatViewRepo db.ChatViewDriver
 }
 
-func NewChatService(chatRepo *db.ChatDriver, chatViewRepo *db.ChatViewDriver) *ChatService {
+func NewChatService(chatRepo *db.ChatDriver, chatViewRepo *db.ChatViewDriver) interfaces.ChatProvider {
 	return &ChatService{chatRepo: *chatRepo, chatViewRepo: *chatViewRepo}
 }
 
