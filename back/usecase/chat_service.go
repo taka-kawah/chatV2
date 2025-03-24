@@ -3,6 +3,7 @@ package usecase
 import (
 	"back/db"
 	"back/domain"
+	"back/interfaces"
 	"fmt"
 )
 
@@ -11,23 +12,18 @@ type ChatService struct {
 	chatViewRepo db.ChatViewDriver
 }
 
-type IChatService interface {
-	PostChat(message string, userId uint, roomId uint) *ChatServiceError
-	GetRecentChatsFromOneRoom(roomId uint) (*[]domain.ChatView, *ChatServiceError)
-}
-
 func NewChatService(chatRepo *db.ChatDriver, chatViewRepo *db.ChatViewDriver) *ChatService {
 	return &ChatService{chatRepo: *chatRepo, chatViewRepo: *chatViewRepo}
 }
 
-func (cs *ChatService) PostChat(message string, userId uint, roomId uint) *ChatServiceError {
+func (cs *ChatService) PostChat(message string, userId uint, roomId uint) interfaces.CustomError {
 	if err := cs.chatRepo.Create(message, userId, roomId); err != nil {
 		return &ChatServiceError{msg: "failed to post chat", err: err}
 	}
 	return nil
 }
 
-func (cs *ChatService) GetRecentChatsFromOneRoom(roomId uint) (*[]domain.ChatView, *ChatServiceError) {
+func (cs *ChatService) GetRecentChatsFromOneRoom(roomId uint) (*[]domain.ChatView, interfaces.CustomError) {
 	limit := 10 //とりあえず直近10件
 	chats, err := cs.chatViewRepo.FetchRecent(roomId, limit)
 	if err != nil {

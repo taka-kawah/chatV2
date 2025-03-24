@@ -7,11 +7,6 @@ import (
 	"fmt"
 )
 
-type IAuthService interface {
-	SignUp(email string, hashedPassword string) interfaces.CustomError
-	SignIn(id string, hashedPassword string) (string, error)
-}
-
 type AuthService struct {
 	repo *db.AuthDriver
 }
