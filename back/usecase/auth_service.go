@@ -5,6 +5,8 @@ import (
 	"back/interfaces"
 	"back/middleware/authentication"
 	"fmt"
+
+	"github.com/gin-gonic/gin"
 )
 
 type AuthService struct {
@@ -38,11 +40,8 @@ func (as *AuthService) SignIn(email string, hashedPassword string) (string, inte
 	return tokenString, nil
 }
 
-func (as *AuthService) ValidateToken(token string) interfaces.CustomError {
-	if err := as.m.ValidateToken(token); err != nil {
-		return &authServiceError{msg: "failed to validate token", err: err}
-	}
-	return nil
+func (as *AuthService) ValidateToken() gin.HandlerFunc {
+	return as.m.AuthMW()
 }
 
 type authServiceError struct {

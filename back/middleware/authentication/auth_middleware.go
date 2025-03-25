@@ -2,6 +2,8 @@ package authentication
 
 import (
 	"back/interfaces"
+	"net/http"
+	"strings"
 
 	"errors"
 	"fmt"
@@ -9,38 +11,39 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/joho/godotenv"
 )
 
-// func AuthMW() gin.HandlerFunc {
-// 	return func(ctx *gin.Context) {
-// 		tokenString := ctx.GetHeader("Authorization")
-// 		if tokenString == "" {
-// 			ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header is missing"})
-// 			ctx.Abort()
-// 			return
-// 		}
-// 		if !strings.HasPrefix(tokenString, "Bearer ") {
-// 			ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token format"})
-// 			ctx.Abort()
-// 			return
-// 		}
-// 		tokenString = strings.TrimPrefix(tokenString, "Bearer ")
+func (am *AuthMiddleware) AuthMW() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		tokenString := ctx.GetHeader("Authorization")
+		if tokenString == "" {
+			ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header is missing"})
+			ctx.Abort()
+			return
+		}
+		if !strings.HasPrefix(tokenString, "Bearer ") {
+			ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token format"})
+			ctx.Abort()
+			return
+		}
+		tokenString = strings.TrimPrefix(tokenString, "Bearer ")
 
-// 		err := validateToken(tokenString)
-// 		if err != nil {
-// 			ctx.JSON(http.StatusUnauthorized, gin.H{
-// 				"msg":            err.Error(),
-// 				"internal error": err.Unwrap(),
-// 			})
-// 			ctx.Abort()
-// 			return
-// 		}
+		err := am.validateToken(tokenString)
+		if err != nil {
+			ctx.JSON(http.StatusUnauthorized, gin.H{
+				"msg":            err.Error(),
+				"internal error": err.Unwrap(),
+			})
+			ctx.Abort()
+			return
+		}
 
-// 		ctx.Next()
-// 	}
-// }
+		ctx.Next()
+	}
+}
 
 type AuthMiddleware struct{}
 
@@ -60,7 +63,7 @@ func (am *AuthMiddleware) GenerateToken(id uint) (string, interfaces.CustomError
 	return tokenString, nil
 }
 
-func (am *AuthMiddleware) ValidateToken(tokenString string) interfaces.CustomError {
+func (am *AuthMiddleware) validateToken(tokenString string) interfaces.CustomError {
 	key, err := loadSecretKey()
 	if err != nil {
 		return &authMWError{msg: "failed to load secret key", err: err}

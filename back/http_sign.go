@@ -1,16 +1,12 @@
 package main
 
 import (
-	"back/interfaces"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
-func setupRouter(p providerManager) *gin.Engine {
-	e := gin.Default()
-	r := e.Group("/api/v1")
-
+func setUpSignEndPointV1(r *gin.RouterGroup, p providerManager) {
 	r.POST("/SignUp", func(ctx *gin.Context) {
 		var req signUpAndSignIn
 		if err := ctx.BindJSON(&req); err != nil {
@@ -40,10 +36,9 @@ func setupRouter(p providerManager) *gin.Engine {
 			"token":   tk,
 		})
 	})
-
-	return e
 }
 
-func internalErrorRes(e interfaces.CustomError, ctx *gin.Context) {
-	ctx.JSON(http.StatusInternalServerError, gin.H{"error": e.Error(), "internal error": e.Unwrap().Error()})
+type signUpAndSignIn struct {
+	email          string
+	hashedPassword string
 }
