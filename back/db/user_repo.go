@@ -27,6 +27,9 @@ func (ud *UserDriver) Create(name string, email string) interfaces.CustomError {
 func (ud *UserDriver) FetchByEmail(email string) (*domain.User, interfaces.CustomError) {
 	var user domain.User
 	res := ud.gormDb.Where("email = ?", email).First(&user)
+	if res.RowsAffected == 0 {
+		return nil, nil
+	}
 	if res.Error != nil {
 		return nil, &userRepositoryError{msg: fmt.Sprintf("failed to fetch user: email = %v", email), err: res.Error}
 	}

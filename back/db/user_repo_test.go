@@ -32,6 +32,10 @@ func TestUserRepo(t *testing.T) {
 		testFetchByEmail(t, mockDbInstances.Mock, d, "test_email")
 	})
 
+	t.Run("normal: fetch user by email but none", func(t *testing.T) {
+		testFetchByEmailButNone(t, mockDbInstances.Mock, d, "test")
+	})
+
 	t.Run("abnormal: fetch user by email without email", func(t *testing.T) {
 		testFetchByEmailWithoutEmail(t, mockDbInstances.Mock, d)
 	})
@@ -111,6 +115,22 @@ func testFetchByEmail(t *testing.T, m sqlmock.Sqlmock, d *UserDriver, email stri
 	}
 	if user.Email != email {
 		t.Errorf("expected email %v but got %v", email, user.Email)
+		return
+	}
+}
+
+func testFetchByEmailButNone(t *testing.T, m sqlmock.Sqlmock, d *UserDriver, email string) {
+	m.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "users" WHERE email = $1 AND "users"."deleted_at" IS NULL ORDER BY "users"."id" LIMIT $2`)).
+		WithArgs(email, 1).
+		WillReturnRows(sqlmock.NewRows([]string{"id"}))
+
+	user, err := d.FetchByEmail(email)
+	if err != nil {
+		t.Errorf("unexpected error (%v)", err)
+		return
+	}
+	if user != nil {
+		t.Errorf("expected nil but got %v", user)
 		return
 	}
 }
