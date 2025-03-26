@@ -1,4 +1,4 @@
-package interfaces
+package provider
 
 import (
 	"back/domain"

@@ -1,7 +1,7 @@
 package authentication
 
 import (
-	"back/interfaces"
+	"back/provider"
 	"net/http"
 	"strings"
 
@@ -47,7 +47,7 @@ func (am *AuthMiddleware) AuthMW() gin.HandlerFunc {
 
 type AuthMiddleware struct{}
 
-func (am *AuthMiddleware) GenerateToken(id uint) (string, interfaces.CustomError) {
+func (am *AuthMiddleware) GenerateToken(id uint) (string, provider.CustomError) {
 	key, err := loadSecretKey()
 	if err != nil {
 		return "", &authMWError{msg: "failed to load secret key", err: err}
@@ -63,7 +63,7 @@ func (am *AuthMiddleware) GenerateToken(id uint) (string, interfaces.CustomError
 	return tokenString, nil
 }
 
-func (am *AuthMiddleware) validateToken(tokenString string) interfaces.CustomError {
+func (am *AuthMiddleware) validateToken(tokenString string) provider.CustomError {
 	key, err := loadSecretKey()
 	if err != nil {
 		return &authMWError{msg: "failed to load secret key", err: err}

@@ -2,22 +2,27 @@ package db
 
 import (
 	"back/domain"
-	"back/interfaces"
+	"back/provider"
 	"fmt"
 
+	"github.com/go-playground/validator/v10"
 	"gorm.io/gorm"
 )
 
 type ChatDriver struct {
-	gormDb *gorm.DB
+	gormDb   *gorm.DB
+	validate *validator.Validate
 }
 
 func NewChatDriver(gormDb *gorm.DB) *ChatDriver {
-	return &ChatDriver{gormDb: gormDb}
+	return &ChatDriver{gormDb: gormDb, validate: validator.New()}
 }
 
-func (cd *ChatDriver) Create(message string, userId uint, roomId uint) interfaces.CustomError {
+func (cd *ChatDriver) Create(message string, userId uint, roomId uint) provider.CustomError {
 	newChat := &domain.Chat{Message: message, UserId: userId, RoomId: roomId}
+	if err := cd.validate.Struct(newChat); err != nil {
+		return &chatRepositoryError{msg: "validation failure", err: err}
+	}
 	if err := cd.gormDb.Create(newChat).Error; err != nil {
 		return &chatRepositoryError{msg: "failed to create new chat", err: err}
 	}

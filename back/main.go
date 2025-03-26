@@ -2,28 +2,29 @@ package main
 
 import (
 	"back/db"
+	"back/http"
 	"back/middleware/authentication"
 	"back/middleware/ws"
+	"back/provider"
 	"back/usecase"
-	"fmt"
+	"log"
 )
 
 func main() {
-	fmt.Println("Hello world 🍣")
 	d, err := db.NewDbInstances()
 	if err != nil {
-		errLog(err)
+		log.Fatalf("%v, %v", err.Error(), err.Unwrap().Error())
 	}
 	defer d.Disconnect()
 
-	pm := &providerManager{
-		ap: usecase.NewAuthService(db.NewAuthDriver(d.GormDb), &authentication.AuthMiddleware{}),
-		cp: usecase.NewChatService(db.NewChatDriver(d.GormDb), db.NewChatViewDriver(d.GormDb)),
-		rp: usecase.NewRoomService(db.NewRoomDriver(d.GormDb)),
-		up: usecase.NewUserService(db.NewUserDriver(d.GormDb)),
-		hp: ws.NewHubManager(),
-	}
+	pm := provider.NewProviderManager(
+		usecase.NewAuthService(db.NewAuthDriver(d.GormDb), &authentication.AuthMiddleware{}),
+		usecase.NewChatService(db.NewChatDriver(d.GormDb), db.NewChatViewDriver(d.GormDb)),
+		usecase.NewRoomService(db.NewRoomDriver(d.GormDb)),
+		usecase.NewUserService(db.NewUserDriver(d.GormDb)),
+		ws.NewHubManager(),
+	)
 
-	e := setupRouter(*pm)
+	e := http.SetupRouter(*pm)
 	e.Run()
 }

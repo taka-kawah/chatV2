@@ -2,29 +2,34 @@ package db
 
 import (
 	"back/domain"
-	"back/interfaces"
+	"back/provider"
 	"fmt"
 
+	"github.com/go-playground/validator/v10"
 	"gorm.io/gorm"
 )
 
 type RoomDriver struct {
-	gormDb *gorm.DB
+	gormDb   *gorm.DB
+	validate *validator.Validate
 }
 
 func NewRoomDriver(gormDb *gorm.DB) *RoomDriver {
-	return &RoomDriver{gormDb: gormDb}
+	return &RoomDriver{gormDb: gormDb, validate: validator.New()}
 }
 
-func (rd *RoomDriver) Create(name string) interfaces.CustomError {
+func (rd *RoomDriver) Create(name string) provider.CustomError {
 	newRoom := domain.Room{Name: name}
+	if err := rd.validate.Struct(&newRoom); err != nil {
+		return &roomRepositoryError{msg: "validation failure", err: err}
+	}
 	if err := rd.gormDb.Create(&newRoom).Error; err != nil {
 		return &roomRepositoryError{msg: "failed to create room", err: err}
 	}
 	return nil
 }
 
-func (rd *RoomDriver) FetchAll() ([]domain.Room, interfaces.CustomError) {
+func (rd *RoomDriver) FetchAll() ([]domain.Room, provider.CustomError) {
 	var rooms []domain.Room
 	res := rd.gormDb.Find(&rooms)
 	if res.Error != nil {
@@ -33,7 +38,7 @@ func (rd *RoomDriver) FetchAll() ([]domain.Room, interfaces.CustomError) {
 	return rooms, nil
 }
 
-func (rd *RoomDriver) FetchById(id uint) (*domain.Room, interfaces.CustomError) {
+func (rd *RoomDriver) FetchById(id uint) (*domain.Room, provider.CustomError) {
 	var room domain.Room
 	res := rd.gormDb.First(&room, id)
 	if res.Error != nil {
@@ -42,14 +47,14 @@ func (rd *RoomDriver) FetchById(id uint) (*domain.Room, interfaces.CustomError) 
 	return &room, nil
 }
 
-func (rd *RoomDriver) UpdateNameById(id uint, newName string) interfaces.CustomError {
+func (rd *RoomDriver) UpdateNameById(id uint, newName string) provider.CustomError {
 	if err := rd.gormDb.Model(&domain.Room{}).Where("id = ?", id).Update("name", newName).Error; err != nil {
 		return &roomRepositoryError{msg: fmt.Sprintf("failed to update room: id = %v", id), err: err}
 	}
 	return nil
 }
 
-func (rd *RoomDriver) DeleteById(id uint) interfaces.CustomError {
+func (rd *RoomDriver) DeleteById(id uint) provider.CustomError {
 	if err := rd.gormDb.Delete(&domain.Room{}, id).Error; err != nil {
 		return &roomRepositoryError{msg: fmt.Sprintf("failed to delete room: id = %v", id), err: err}
 	}

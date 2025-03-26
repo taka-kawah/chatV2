@@ -3,49 +3,43 @@ package usecase
 import (
 	"back/db"
 	"back/domain"
-	"back/interfaces"
-	"fmt"
+	"back/provider"
 )
 
 type RoomService struct {
 	repo db.RoomDriver
 }
 
-func NewRoomService(repo *db.RoomDriver) interfaces.RoomProvider {
+func NewRoomService(repo *db.RoomDriver) provider.RoomProvider {
 	return &RoomService{repo: *repo}
 }
 
-func (rs *RoomService) CreateNewRoom(name string) interfaces.CustomError {
+func (rs *RoomService) CreateNewRoom(name string) provider.CustomError {
 	if err := rs.repo.Create(name); err != nil {
-		return &roomServiceError{msg: "failed to create new room", err: err}
+		return err
 	}
 	return nil
 }
 
-func (rs *RoomService) GetAllRooms() ([]domain.Room, interfaces.CustomError) {
+func (rs *RoomService) GetAllRooms() ([]domain.Room, provider.CustomError) {
 	rooms, err := rs.repo.FetchAll()
 	if err != nil {
-		return nil, &roomServiceError{msg: "failed to get all rooms", err: err}
+		return nil, err
 	}
 	return rooms, nil
 }
 
-func (rs *RoomService) UpdateRoomName(roomId uint, newName string) interfaces.CustomError {
+func (rs *RoomService) GetRoomById(id uint) (*domain.Room, provider.CustomError) {
+	room, err := rs.repo.FetchById(id)
+	if err != nil {
+		return nil, err
+	}
+	return room, err
+}
+
+func (rs *RoomService) UpdateRoomName(roomId uint, newName string) provider.CustomError {
 	if err := rs.repo.UpdateNameById(roomId, newName); err != nil {
-		return &roomServiceError{msg: fmt.Sprintf("failed to update room name: id = %v", roomId), err: err}
+		return err
 	}
 	return nil
-}
-
-type roomServiceError struct {
-	msg string
-	err error
-}
-
-func (e *roomServiceError) Error() string {
-	return fmt.Sprintf("error occurs in room service %s, (%s)", e.msg, e.err)
-}
-
-func (e *roomServiceError) Unwrap() error {
-	return e.err
 }

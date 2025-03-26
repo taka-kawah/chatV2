@@ -2,29 +2,34 @@ package db
 
 import (
 	"back/domain"
-	"back/interfaces"
+	"back/provider"
 	"fmt"
 
+	"github.com/go-playground/validator/v10"
 	"gorm.io/gorm"
 )
 
 type UserDriver struct {
-	gormDb *gorm.DB
+	gormDb   *gorm.DB
+	validate *validator.Validate
 }
 
 func NewUserDriver(gormDb *gorm.DB) *UserDriver {
 	return &UserDriver{gormDb: gormDb}
 }
 
-func (ud *UserDriver) Create(name string, email string) interfaces.CustomError {
+func (ud *UserDriver) Create(name string, email string) provider.CustomError {
 	newUser := domain.User{Name: name, Email: email}
+	if err := ud.validate.Struct(&newUser); err != nil {
+		return &userRepositoryError{msg: "validation failure", err: err}
+	}
 	if err := ud.gormDb.Create(&newUser).Error; err != nil {
 		return &userRepositoryError{msg: "failed to create new user", err: err}
 	}
 	return nil
 }
 
-func (ud *UserDriver) FetchByEmail(email string) (*domain.User, interfaces.CustomError) {
+func (ud *UserDriver) FetchByEmail(email string) (*domain.User, provider.CustomError) {
 	var user domain.User
 	res := ud.gormDb.Where("email = ?", email).First(&user)
 	if res.RowsAffected == 0 {
@@ -36,7 +41,7 @@ func (ud *UserDriver) FetchByEmail(email string) (*domain.User, interfaces.Custo
 	return &user, nil
 }
 
-func (ud *UserDriver) FetchAll() (*[]domain.User, interfaces.CustomError) {
+func (ud *UserDriver) FetchAll() (*[]domain.User, provider.CustomError) {
 	var users []domain.User
 	res := ud.gormDb.Find(&users)
 	if res.Error != nil {
@@ -45,14 +50,14 @@ func (ud *UserDriver) FetchAll() (*[]domain.User, interfaces.CustomError) {
 	return &users, nil
 }
 
-func (ud *UserDriver) UpdateNameById(id uint, newName string) interfaces.CustomError {
+func (ud *UserDriver) UpdateNameById(id uint, newName string) provider.CustomError {
 	if err := ud.gormDb.Model(&domain.User{}).Where("id = ?", id).Update("name", newName).Error; err != nil {
 		return &userRepositoryError{msg: fmt.Sprintf("failed to update user: id = %v", id), err: err}
 	}
 	return nil
 }
 
-func (ud *UserDriver) DeleteById(id uint) interfaces.CustomError {
+func (ud *UserDriver) DeleteById(id uint) provider.CustomError {
 	if err := ud.gormDb.Delete(&domain.User{}, id).Error; err != nil {
 		return &userRepositoryError{msg: fmt.Sprintf("failed to update user: id = %v", id), err: err}
 	}

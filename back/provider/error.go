@@ -1,4 +1,4 @@
-package interfaces
+package provider
 
 type CustomError interface {
 	Error() string

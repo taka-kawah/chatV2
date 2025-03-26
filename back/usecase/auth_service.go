@@ -2,8 +2,8 @@ package usecase
 
 import (
 	"back/db"
-	"back/interfaces"
 	"back/middleware/authentication"
+	"back/provider"
 	"fmt"
 
 	"github.com/gin-gonic/gin"
@@ -14,18 +14,18 @@ type AuthService struct {
 	m *authentication.AuthMiddleware
 }
 
-func NewAuthService(d *db.AuthDriver, m *authentication.AuthMiddleware) interfaces.AuthProvider {
+func NewAuthService(d *db.AuthDriver, m *authentication.AuthMiddleware) provider.AuthProvider {
 	return &AuthService{d: d, m: m}
 }
 
-func (as *AuthService) SignUp(email string, hashedPassword string) interfaces.CustomError {
+func (as *AuthService) SignUp(email string, hashedPassword string) provider.CustomError {
 	if err := as.d.Create(email, hashedPassword); err != nil {
 		return &authServiceError{msg: "failed to create auth record", err: err}
 	}
 	return nil
 }
 
-func (as *AuthService) SignIn(email string, hashedPassword string) (string, interfaces.CustomError) {
+func (as *AuthService) SignIn(email string, hashedPassword string) (string, provider.CustomError) {
 	auth, err := as.d.CheckIfExist(email, hashedPassword)
 	if err != nil {
 		return "", &authServiceError{msg: "failed to fetch auth record", err: err}

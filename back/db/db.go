@@ -1,7 +1,8 @@
 package db
 
 import (
-	"back/interfaces"
+	"back/domain"
+	"back/provider"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -18,16 +19,17 @@ type DbInstances struct {
 	SqlDB  *sql.DB
 }
 
-func NewDbInstances() (*DbInstances, interfaces.CustomError) {
+func NewDbInstances() (*DbInstances, provider.CustomError) {
 	dsn, err := loadDsn()
 	if err != nil {
-		return nil, err.(interfaces.CustomError)
+		return nil, err.(provider.CustomError)
 	}
 
 	gormDb, err := gorm.Open(postgres.Open(dsn), &gorm.Config{PrepareStmt: true})
 	if err != nil {
 		return nil, &connectionToDbError{msg: "failed to open gormDb", err: err}
 	}
+	gormDb.AutoMigrate(&domain.Auth{}, &domain.Chat{}, &domain.Room{}, &domain.Room{}, &domain.User{})
 
 	sqlDb, err := gormDb.DB()
 	if err != nil {

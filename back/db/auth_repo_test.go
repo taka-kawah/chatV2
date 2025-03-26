@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/go-playground/validator/v10"
 )
 
 func TestAuthRepo(t *testing.T) {
@@ -30,15 +31,14 @@ func TestAuthRepo(t *testing.T) {
 	t.Run("abnormal: create auth without email", func(t *testing.T) {
 		mockDbInstances.Mock.ExpectBegin()
 		mockDbInstances.Mock.ExpectQuery(regexp.QuoteMeta(`INSERT INTO "auths" ("created_at","updated_at","deleted_at","email","hashed_password") VALUES ($1,$2,$3,$4,$5) RETURNING "id"`)).
-			WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), "", "test_hashed").
-			WillReturnError(errors.New("expected"))
+			WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), "", "test_hashed")
 		mockDbInstances.Mock.ExpectRollback()
 		err := d.Create("", "test_hashed")
 		if err == nil {
 			t.Errorf("expected error but got nil")
 			return
 		}
-		if err.Unwrap().Error() != "expected" {
+		if !errors.As(err.Unwrap(), &validator.ValidationErrors{}) {
 			t.Errorf("unexpected error (%v)", err)
 			return
 		}

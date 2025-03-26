@@ -1,30 +1,31 @@
-package main
+package http
 
 import (
+	"back/provider"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
-func setUpUserEndpointV1(r *gin.RouterGroup, p providerManager) {
+func setUpUserEndpointV1(r *gin.RouterGroup, p provider.ProviderManager) {
+	ur := r.Group("/user")
 
-	r.GET("/AllUserInfo", p.ap.ValidateToken(), func(ctx *gin.Context) {
-		users, ce := p.up.GetAllUsers()
+	ur.GET("/all", p.Ap().ValidateToken(), func(ctx *gin.Context) {
+		users, ce := p.Up().GetAllUsers()
 		if ce != nil {
 			internalErrorRes(ce, ctx)
 		}
-		ctx.JSON(http.StatusOK, gin.H{"UsersInfo": users})
+		ctx.JSON(http.StatusOK, users)
 	})
 
-	r.GET("/UserInfo", p.ap.ValidateToken(), func(ctx *gin.Context) {
+	ur.GET("/", p.Ap().ValidateToken(), func(ctx *gin.Context) {
 		email, ok := ctx.GetQuery("email")
-
 		if !ok {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "email is not set"})
 			return
 		}
-		user, ce := p.up.GetFromEmail(email)
+		user, ce := p.Up().GetFromEmail(email)
 		if ce != nil {
 			internalErrorRes(ce, ctx)
 			return
@@ -33,36 +34,36 @@ func setUpUserEndpointV1(r *gin.RouterGroup, p providerManager) {
 			ctx.JSON(http.StatusNotFound, gin.H{"message": "user not created"})
 			return
 		}
-		ctx.JSON(http.StatusOK, gin.H{"MyInfo": user})
+		ctx.JSON(http.StatusOK, user)
 	})
 
-	r.POST("/UserInfoCreation", p.ap.ValidateToken(), func(ctx *gin.Context) {
+	ur.POST("/new", p.Ap().ValidateToken(), func(ctx *gin.Context) {
 		var req userInfoCreation
 		if err := ctx.BindJSON(&req); err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err})
 			return
 		}
-		if ce := p.up.RegisterAccount(req.name, req.email); ce != nil {
-			internalErrorRes(ce, ctx)
+		if err := p.Up().RegisterAccount(req.Name, req.Email); err != nil {
+			internalErrorRes(err, ctx)
 			return
 		}
 		ctx.JSON(http.StatusOK, gin.H{"message": "successfully created!"})
 	})
 
-	r.POST("/UserNameChange", p.ap.ValidateToken(), func(ctx *gin.Context) {
+	ur.POST("/name/change", p.Ap().ValidateToken(), func(ctx *gin.Context) {
 		var req userInfoChange
 		if err := ctx.BindJSON(&req); err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err})
 			return
 		}
-		if ce := p.up.UpdateName(req.id, req.newName); ce != nil {
-			internalErrorRes(ce, ctx)
+		if err := p.Up().UpdateName(req.Id, req.NewName); err != nil {
+			internalErrorRes(err, ctx)
 			return
 		}
 		ctx.JSON(http.StatusOK, gin.H{"message": "successfully updated!"})
 	})
 
-	r.POST("/UserDeletion", p.ap.ValidateToken(), func(ctx *gin.Context) {
+	ur.GET("/delete", p.Ap().ValidateToken(), func(ctx *gin.Context) {
 		strId, ok := ctx.GetQuery("id")
 		if !ok {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "id is not set"})
@@ -73,7 +74,7 @@ func setUpUserEndpointV1(r *gin.RouterGroup, p providerManager) {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err})
 			return
 		}
-		if ce := p.up.Delete(uint(id)); ce != nil {
+		if ce := p.Up().Delete(uint(id)); ce != nil {
 			internalErrorRes(ce, ctx)
 			return
 		}
@@ -82,11 +83,11 @@ func setUpUserEndpointV1(r *gin.RouterGroup, p providerManager) {
 }
 
 type userInfoCreation struct {
-	name  string
-	email string
+	Name  string `json:"name"`
+	Email string `json:"email"`
 }
 
 type userInfoChange struct {
-	id      uint
-	newName string
+	Id      uint   `json:"id"`
+	NewName string `json:"newName"`
 }
