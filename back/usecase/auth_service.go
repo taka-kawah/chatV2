@@ -18,8 +18,8 @@ func NewAuthService(d *db.AuthDriver, m *authentication.AuthMiddleware) provider
 	return &AuthService{d: d, m: m}
 }
 
-func (as *AuthService) SignUp(email string, hashedPassword string) provider.CustomError {
-	if err := as.d.Create(email, hashedPassword); err != nil {
+func (as *AuthService) SignUp(email string, hashedPassword string, token string) provider.CustomError {
+	if err := as.d.Create(email, hashedPassword, token); err != nil {
 		return &authServiceError{msg: "failed to create auth record", err: err}
 	}
 	return nil
@@ -38,6 +38,13 @@ func (as *AuthService) SignIn(email string, hashedPassword string) (string, prov
 		return "", err
 	}
 	return tokenString, nil
+}
+
+func (as *AuthService) SetToken(email string, hashedPassword string, token string) provider.CustomError {
+	if err := as.d.SetToken(email, hashedPassword, token); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (as *AuthService) ValidateToken() gin.HandlerFunc {

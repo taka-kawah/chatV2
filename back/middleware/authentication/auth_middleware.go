@@ -54,7 +54,7 @@ func (am *AuthMiddleware) GenerateToken(id uint) (string, provider.CustomError) 
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"id":  strconv.FormatUint(uint64(id), 10),
-		"exp": time.Now().Add(time.Hour * 24).Unix(),
+		"exp": time.Now().Add(time.Hour * 24 * 7).Unix(),
 	})
 	tokenString, err := token.SignedString([]byte(key))
 	if err != nil {

@@ -19,8 +19,8 @@ func NewAuthDriver(gormDb *gorm.DB) *AuthDriver {
 	return &AuthDriver{gormDb: gormDb, validate: validator.New()}
 }
 
-func (d *AuthDriver) Create(email string, hashedPassword string) provider.CustomError {
-	newAuth := &domain.Auth{Email: email, HashedPassword: hashedPassword}
+func (d *AuthDriver) Create(email string, hashedPassword string, token string) provider.CustomError {
+	newAuth := &domain.Auth{Email: email, HashedPassword: hashedPassword, Token: token}
 	if err := d.validate.Struct(newAuth); err != nil {
 		return &authRepositoryError{msg: "validation failure", err: err}
 	}
@@ -40,6 +40,13 @@ func (d *AuthDriver) CheckIfExist(email string, hashedPassword string) (*domain.
 		return nil, nil
 	}
 	return nil, &authRepositoryError{msg: fmt.Sprintf("failled to fetch auth email: %v", email), err: res.Error}
+}
+
+func (d *AuthDriver) SetToken(email string, hashedPassword string, token string) provider.CustomError {
+	if err := d.gormDb.Model(&domain.Room{}).Where("email = ?", email).Update("token", token).Error; err != nil {
+		return &authRepositoryError{msg: fmt.Sprintf("failed to set token email: ", email), err: err}
+	}
+	return nil
 }
 
 func (d *AuthDriver) DeleteAuth(email string, hashedPassword string) provider.CustomError {

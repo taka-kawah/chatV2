@@ -16,14 +16,14 @@ func setUpAuthEndPointV1(r *gin.RouterGroup, p provider.ProviderManager) {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-		if ce := p.Ap().SignUp(req.Email, req.HashedPassword); ce != nil {
+		if ce := p.Ap().SignUp(req.Email, req.HashedPassword, ""); ce != nil {
 			internalErrorRes(ce, ctx)
 			return
 		}
 		ctx.JSON(http.StatusCreated, gin.H{"message": "new account is created!"})
 	})
 
-	ar.POST("/", func(ctx *gin.Context) {
+	ar.POST("/signin", func(ctx *gin.Context) {
 		var req signUpAndSignIn
 		if err := ctx.BindJSON(&req); err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
