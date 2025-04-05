@@ -1,0 +1,15 @@
+FROM node:18
+
+WORKDIR /app
+
+COPY package*.json /app
+
+ENV NODE_ENV=development
+
+RUN npm i \
+    && npm config set legacy-peer-deps true \
+    && npm config set strict-peer-deps false
+
+COPY . .
+
+CMD [ "npm", "run", "start" ]

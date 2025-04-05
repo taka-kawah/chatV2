@@ -44,7 +44,7 @@ func (d *AuthDriver) CheckIfExist(email string, hashedPassword string) (*domain.
 
 func (d *AuthDriver) SetToken(email string, hashedPassword string, token string) provider.CustomError {
 	if err := d.gormDb.Model(&domain.Room{}).Where("email = ?", email).Update("token", token).Error; err != nil {
-		return &authRepositoryError{msg: fmt.Sprintf("failed to set token email: ", email), err: err}
+		return &authRepositoryError{msg: fmt.Sprintf("failed to set token email: %v", email), err: err}
 	}
 	return nil
 }

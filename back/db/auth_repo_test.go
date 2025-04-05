@@ -23,7 +23,7 @@ func TestAuthRepo(t *testing.T) {
 			WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), "test@test.com", "test_hashed").
 			WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
 		mockDbInstances.Mock.ExpectCommit()
-		if err := d.Create("test@test.com", "test_hashed"); err != nil {
+		if err := d.Create("test@test.com", "test_hashed", ""); err != nil {
 			t.Errorf("unexpected error (%v)", err)
 		}
 	})
@@ -33,7 +33,7 @@ func TestAuthRepo(t *testing.T) {
 		mockDbInstances.Mock.ExpectQuery(regexp.QuoteMeta(`INSERT INTO "auths" ("created_at","updated_at","deleted_at","email","hashed_password") VALUES ($1,$2,$3,$4,$5) RETURNING "id"`)).
 			WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), "", "test_hashed")
 		mockDbInstances.Mock.ExpectRollback()
-		err := d.Create("", "test_hashed")
+		err := d.Create("", "test_hashed", "")
 		if err == nil {
 			t.Errorf("expected error but got nil")
 			return
@@ -50,7 +50,7 @@ func TestAuthRepo(t *testing.T) {
 			WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), "test@test.com", "").
 			WillReturnError(errors.New("expected"))
 		mockDbInstances.Mock.ExpectRollback()
-		err := d.Create("test@test.com", "")
+		err := d.Create("test@test.com", "", "")
 		if err == nil {
 			t.Errorf("expected error but got nil")
 			return
