@@ -12,4 +12,6 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: "1.23.6"
-      - run: go test back/db/*.go
+      - run: |
+          cd back
+          go test ./db -v
