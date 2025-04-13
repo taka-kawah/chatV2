@@ -1,0 +1,15 @@
+name: Run Tests
+
+on:
+  push:
+    paths: ["back/**/**.go"]
+
+jobs:
+  test-back:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.23.6"
+      - run: go test back/db/*.go

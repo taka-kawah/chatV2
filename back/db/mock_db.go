@@ -15,7 +15,7 @@ type mockDbInstances struct {
 	Mock   sqlmock.Sqlmock
 }
 
-func NewMockDbInstances() (*mockDbInstances, error) {
+func newMockDbInstances() (*mockDbInstances, error) {
 	sqlDb, mock, err := sqlmock.New()
 	if err != nil {
 		return nil, fmt.Errorf("failed to create mock db (%s)", err)

@@ -8,7 +8,7 @@ import (
 )
 
 func TestChatViewRepo(t *testing.T) {
-	mockDbInstances, err := NewMockDbInstances()
+	mockDbInstances, err := newMockDbInstances()
 	if err != nil {
 		log.Fatal("failed to create mock")
 	}
