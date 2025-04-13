@@ -57,17 +57,13 @@ func TestAuthRepo(t *testing.T) {
 		m, d := setUpAuthDriver()
 		defer m.Disconnect()
 
-		m.Mock.ExpectBegin()
-		m.Mock.ExpectQuery(regexp.QuoteMeta(`INSERT INTO "auths" ("created_at","updated_at","deleted_at","email","hashed_password","token") VALUES ($1,$2,$3,$4,$5,$6) RETURNING "id"`)).
-			WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), "test@test.com", "", sqlmock.AnyArg()).
-			WillReturnError(errors.New("expected"))
-		m.Mock.ExpectRollback()
 		err := d.Create("test@test.com", "", "")
 		if err == nil {
 			t.Errorf("expected error but got nil")
 			return
 		}
-		if err.Unwrap().Error() != "expected" {
+		var ve validator.ValidationErrors
+		if !errors.As(err.Unwrap(), &ve) {
 			t.Errorf("unexpected error (%v)", err)
 			return
 		}
